@@ -1,0 +1,31 @@
+#version 450
+#extension GL_EXT_mesh_shader : require
+
+layout(local_size_x = 1) in;
+layout(triangles, max_vertices = 4, max_primitives = 2) out;
+
+struct Vertex {
+    vec2 pos;
+    vec2 pad;
+    vec4 color;
+};
+
+layout(push_constant) uniform PushBlock {
+    Vertex vertices[4];
+} pc;
+
+layout(location = 0) out VertexOutput {
+    vec4 color;
+} v_out[];
+
+void main() {
+    SetMeshOutputsEXT(4, 2);
+
+    for (int i = 0; i < 4; ++i) {
+        gl_MeshVerticesEXT[i].gl_Position = vec4(pc.vertices[i].pos, 0.0, 1.0);
+        v_out[i].color = pc.vertices[i].color;
+    }
+
+    gl_PrimitiveTriangleIndicesEXT[0] = uvec3(0, 1, 2);
+    gl_PrimitiveTriangleIndicesEXT[1] = uvec3(0, 2, 3);
+}
